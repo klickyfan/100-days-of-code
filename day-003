@@ -1,0 +1,167 @@
+using System.IO;
+using System;
+using System.Collections.Generic;
+
+/*
+
+https://adventofcode.com/2015/day/3
+
+solution uses Dictionary, Tuple
+
+Note: I could not run this at codingground (tutorialspoint.com) against the test
+input provided at adventofcode, as it would not accept such a long input string.
+I was able to run it at my account at repl.it. (The solutions are 2565 and 2639.)
+
+*/
+
+class Program
+{
+    const bool VERBOSE = true;
+    
+    static void Main()
+    {
+        string directions = Console.ReadLine();
+        
+        if (VERBOSE) Console.WriteLine("Directions given: {0}", directions);
+        
+        if (VERBOSE) Console.WriteLine("Starting present delivery.");
+        
+        DeliverPresents(directions);
+        
+        if (VERBOSE) Console.WriteLine("Starting present delivery.");
+        
+        DeliverPresentsWithRoboSanta(directions);
+    }
+    
+    static void DeliverPresents(string directions)
+    {
+        // dictionary of number of times a house at (x, y) has been visited
+        Dictionary<Tuple<int, int>, int> houses = new Dictionary<Tuple<int, int>, int>();
+        
+        houses.Add(Tuple.Create(0, 0), 1);
+        
+        int x = 0;
+        int y = 0;
+        
+        for (int i = 0; i < directions.Length; i++)
+        {
+            char direction = directions[i];
+            
+            UpdateCoordinates(direction, ref x, ref y);
+            
+            Tuple<int, int> tuple = Tuple.Create(x, y);
+            
+            VisitHouse(houses, tuple);
+        }
+        
+        if (VERBOSE) PrintHousesVisited(houses);
+        
+        Console.WriteLine("***************************************************");
+        Console.WriteLine("Total houses visited by Santa: {0}", houses.Count);
+        Console.WriteLine("***************************************************");
+    }
+    
+    static void DeliverPresentsWithRoboSanta(string directions)
+    {
+        // dictionary of number of times a house at (x, y) has been visited
+        Dictionary<Tuple<int, int>, int> houses = new Dictionary<Tuple<int, int>, int>();
+        
+        houses.Add(Tuple.Create(0, 0), 1);
+        
+        int xOfSanta = 0;
+        int yOfSanta = 0;
+        int xOfRoboSanta = 0;
+        int yOfRoboSanta = 0;
+        
+        bool isSanta = true;
+        
+        for (int i = 0; i < directions.Length; i++)
+        {
+            char direction = directions[i];
+            
+            Tuple<int, int> tuple = null;
+            
+            if (isSanta)
+            {
+                UpdateCoordinates(direction, ref xOfSanta, ref yOfSanta);
+                tuple = Tuple.Create(xOfSanta, yOfSanta);
+            }
+            else
+            {
+                 UpdateCoordinates(direction, ref xOfRoboSanta, ref yOfRoboSanta);
+                 tuple = Tuple.Create(xOfRoboSanta, yOfRoboSanta);
+            }
+            
+            VisitHouse(houses, tuple);
+            
+            // Santa and Robo-Santa take turns taking direction
+            if (isSanta)
+            {
+                isSanta = false;
+            }
+            else
+            {
+                isSanta = true;
+            }
+        }
+        
+        if (VERBOSE) PrintHousesVisited(houses);
+        
+        Console.WriteLine("***************************************************");
+        Console.WriteLine("Total houses visited by Santa and Robo-Santa: {0}", houses.Count);
+        Console.WriteLine("***************************************************");
+    }
+    
+    static void UpdateCoordinates(char direction, ref int x, ref int y)
+    {
+        if (direction == '>')
+        {
+            x += 1;
+            Console.WriteLine("Moving east.");
+        }
+        else if (direction == '<')
+        {
+            x -= 1;
+            Console.WriteLine("Moving west.");
+        }
+        else if (direction == '^')
+        {
+            y += 1;
+            Console.WriteLine("Moving north.");
+        }
+        else if (direction == 'v')
+        {
+            y -= 1;
+            Console.WriteLine("Moving south.");
+        }
+            
+        /* 
+        more compact (less readable?) way to write above:
+        x += direction == '>' ? 1 : (direction == '<' ? -1 : 0);
+        y += direction == '^' ? 1 : (direction == 'v' ? -1 : 0);
+        */
+    }
+    
+    static void VisitHouse(Dictionary<Tuple<int, int>, int> houses, Tuple<int, int> tuple)
+    {
+        if (houses.ContainsKey(tuple))
+        {
+            houses[tuple] += 1;
+            if (VERBOSE) Console.WriteLine("Revisiting house at ({0}, {1}).", tuple.Item1, tuple.Item2);
+        }
+        else
+        {
+            houses.Add(tuple, 1);
+            if (VERBOSE) Console.WriteLine("Visiting a new house at ({0}, {1}).", tuple.Item1, tuple.Item2);
+        }
+    }
+    
+    static void PrintHousesVisited(Dictionary<Tuple<int, int>, int> houses)
+    {
+        foreach(Tuple<int, int> key in houses.Keys)
+        {
+            Console.WriteLine(
+                "House at ({0}, {1}) has been visited {2} times", key.Item1, key.Item2, houses[key]);
+        }
+    }
+}
