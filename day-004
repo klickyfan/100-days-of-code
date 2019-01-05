@@ -1,0 +1,94 @@
+using System.IO;
+using System;
+using System.Security.Cryptography;
+using System.Text;
+
+/*
+
+https://adventofcode.com/2015/day/4
+
+solution uses MD5
+
+Note: I could not run this at codingground (tutorialspoint.com) as it produced to much 
+output. I was able to run it at my account at repl.it. (The solutions are 346386 and 
+9958218.)
+
+*/
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        string key = "iwrupvqb";
+
+        Console.WriteLine("Starting part 1 tests.");
+        Part1(key);
+
+        Console.WriteLine("Starting part 2 tests.");
+        Part2(key);
+    }
+
+    static void Part1(string key)
+    {
+        MD5 hash = MD5.Create();
+
+        for (int i = 0; ; ++i)
+        {
+            string toHash = key + i;
+
+            if ((i % 100) == 0)
+            {
+                Console.WriteLine("Trying {0}...", toHash);
+            }
+
+            byte[] bytes = hash.ComputeHash(Encoding.UTF8.GetBytes(toHash));
+
+            if (bytes[0] < 0x1 && bytes[1] < 0x1 && bytes[2] <= 0x0f)
+            {
+                Console.WriteLine(
+                    "Found it! (i = {0}, hash = {1})", i, ConvertToHexidecimal(bytes));
+
+                return;
+            }
+        }
+    }
+
+    static void Part2(string key)
+    {
+        MD5 hash = MD5.Create();
+
+        for (int i = 0; ; ++i)
+        {
+            string toHash = key + i;
+
+            if ((i % 100) == 0)
+            {
+                Console.WriteLine("Trying {0}...", toHash);
+            }
+
+            byte[] bytes = hash.ComputeHash(Encoding.UTF8.GetBytes(toHash));
+
+            if (bytes[0] < 0x1 && bytes[1] < 0x1 && bytes[2] < 0x1)
+            {
+                Console.WriteLine(
+                    "Found it! (i = {0}, hash = {1})", i, ConvertToHexidecimal(bytes));
+                    
+                return;
+            }
+        }
+    }
+    
+    static string ConvertToHexidecimal(byte[] data)
+    {
+        StringBuilder sBuilder = new StringBuilder();
+
+        // loop through each byte of the hashed data and format each one as a hexadecimal string
+        for (int i = 0; i < data.Length; i++)
+        {
+            sBuilder.Append(data[i].ToString("x2"));
+        }
+
+        return sBuilder.ToString();
+    }
+}
+
