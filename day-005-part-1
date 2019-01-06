@@ -1,0 +1,122 @@
+using System.IO;
+using System;
+using System.Security.Cryptography;
+using System.Text;
+
+/*
+
+https://adventofcode.com/2015/day/5 (but only part 1)
+
+*/
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        long nice = 0;
+        
+        string input = Console.ReadLine();
+        while (input != null)
+        {
+            if (IsNice(input))
+            {
+                nice++;
+            }
+            
+            input = Console.ReadLine();
+        }
+        
+        Console.WriteLine("************************");
+        Console.WriteLine("{0} strings are nice", nice);
+        Console.WriteLine("************************");
+    }
+    
+    /*
+    Returns true if input string is "nice".
+    
+    A nice string is one with all of the following properties:
+
+    It contains at least three vowels (aeiou only), like aei, xazegov, or aeiouaeiouaeiou.
+    It contains at least one letter that appears twice in a row, like xx, abcdde (dd), or aabbccdd (aa, bb, cc, or dd).
+    It does not contain the strings ab, cd, pq, or xy, even if they are part of one of the other requirements.
+    */
+    static bool IsNice(string input)
+    {
+        bool isNice = true;
+        
+        int vowels = 0;
+        char lastLetter = 'a';
+        bool foundDoubleLetter = false;
+        bool foundDisallowedPair = false;
+        
+        for (int i = 0; i < input.Length; i++)
+        {
+            if (IsVowel(input[i]))
+            {
+                vowels++;
+            }
+            
+            if (i > 0)
+            {
+                if (input[i] == lastLetter)
+                {
+                    foundDoubleLetter = true;
+                }
+                if (IsDisallowedPair(lastLetter, input[i]))
+                {
+                    foundDisallowedPair = true;
+                }
+                    
+            }
+            
+            lastLetter = input[i];
+        }
+        
+        if (vowels < 3 || !foundDoubleLetter || foundDisallowedPair)
+        {
+            isNice = false;
+        }
+        
+        Console.WriteLine("{0} is {1}nice.", input, isNice ? "" : "not " );
+        
+        return isNice;
+    }
+    
+    /*
+    Returns true if letter is a vowel.
+    */
+    static bool IsVowel(char letter)
+    {
+        return letter == 'a' || letter == 'e' || letter == 'i' || letter == 'o' || letter == 'u';
+    }
+    
+    /*
+    Returns true if firstLetter + secondLetter is in {ab, cd, pq, or xy}.
+    */
+    static bool IsDisallowedPair(char firstLetter, char secondLetter)
+    {
+        
+        bool isDisallowedPair = false;
+        
+        switch (firstLetter)
+        {
+            case 'a':
+                if (secondLetter == 'b') isDisallowedPair = true;
+                break;
+                
+            case 'c':
+                if (secondLetter == 'd') isDisallowedPair = true;;
+                break;
+            case 'p':
+                if (secondLetter == 'q') isDisallowedPair = true;;
+                break;
+            case 'x':
+                if (secondLetter == 'y') isDisallowedPair = true;;
+                break;
+            default:
+                break;
+        }
+        
+        return isDisallowedPair;
+    }
+}
