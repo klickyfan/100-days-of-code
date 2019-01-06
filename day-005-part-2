@@ -1,0 +1,162 @@
+using System.IO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using AdventOfCodeExtensions;
+
+/*
+
+https://adventofcode.com/2015/day/5#part2
+
+solution uses Dictionary and extension method
+
+*/
+
+class Program
+{
+    const bool VERBOSE = true;
+    
+    static void Main(string[] args)
+    {
+        long nice = 0;
+        
+        string input = Console.ReadLine();
+        while (input != null)
+        {
+            if (IsNice(input))
+            {
+                nice++;
+            }
+            
+            input = Console.ReadLine();
+        }
+        
+        Console.WriteLine("************************");
+        Console.WriteLine("{0} strings are nice", nice);
+        Console.WriteLine("************************");
+    }
+    
+    /*
+    Returns true if input string is "nice".
+    
+    It contains a pair of any two letters that appears at least twice in the 
+    string without overlapping, like xyxy (xy) or aabcdefgaa (aa), but not like 
+    aaa (aa, but it overlaps).
+
+    It contains at least one letter which repeats with exactly one letter 
+    between them, like xyx, abcdefeghi (efe), or even aaa.
+    */
+    static bool IsNice(string input)
+    {
+        bool isNice = false;
+        
+        Dictionary<string, int> uniquePairs = new Dictionary<string, int>();
+        
+        bool foundDoublePair = false;
+        bool foundDoubleLetter = false;
+        
+        for (int i = 0; i < input.Length; i++)
+        {
+            if (VERBOSE)
+            {
+                Console.Write("i: {0}, input[i]: {1}", i, input[i]);
+                    
+                if (i > 0)
+                {
+                    Console.Write(", input[i-1]: {0}", input[i - 1]);
+                }
+                
+                if (i > 1)
+                {
+                    Console.Write(", input[i-1]: {0}", input[i - 2]);
+                }
+                
+                Console.WriteLine();
+            }
+                
+            if (i > 1)
+            {
+                // check for double letters
+                
+                if (input[i] == input[i - 2])
+                {
+                    if (VERBOSE) 
+                    {
+                        Console.WriteLine("Found double letter!");
+                    }
+                    foundDoubleLetter = true;
+                }
+            }
+            
+            if (i > 0)
+            {
+                // check for repeated non-overlapping pairs
+                
+                string pair = StringFromCharacters(input[i - 1], input[i]);
+                
+                if (VERBOSE)
+                {
+                    Console.WriteLine("Newest pair: {0}", pair);
+                }
+                
+                if (uniquePairs.ContainsKey(pair))
+                {
+                    if (uniquePairs[pair] < i - 2)
+                    {
+                        if (VERBOSE) 
+                        {
+                            Console.WriteLine("Found double pair!");
+                        }
+                        foundDoublePair = true;
+                    }
+                }
+                else
+                {
+                    uniquePairs.Add(pair, i - 1);
+                }
+                
+                if (VERBOSE)
+                {
+                    Console.WriteLine("All pairs found: {0}", uniquePairs.ToStringExtended());
+                }
+            }
+        }
+        
+        if (foundDoublePair && foundDoubleLetter)
+        {
+            isNice = true;
+        }
+        
+        if (VERBOSE) 
+        {
+            Console.WriteLine("******************************");
+            Console.WriteLine("{0} is {1}nice.", input, isNice ? "" : "not " );
+            Console.WriteLine("******************************");
+        }
+        return isNice;
+    }
+    
+    public static string StringFromCharacters(char c0, char c1)
+    {
+        char[] arr = new char[2];
+        arr[0] = c0;
+        arr[1] = c1;
+        return new string(arr);
+    }
+}
+
+namespace AdventOfCodeExtensions 
+{
+    public static class Extensions
+    {
+        public static string ToStringExtended(this Dictionary<string,int> source)
+        {
+            string keyValueSeparator = "=";
+            string sequenceSeparator = "; ";
+            
+            var pairs = source.Select(x => string.Format("{0}{1}{2}", x.Key, keyValueSeparator, x.Value));
+            
+            return string.Join(sequenceSeparator, pairs);
+        }
+    }
+}
