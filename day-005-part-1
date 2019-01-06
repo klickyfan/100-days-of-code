@@ -102,8 +102,7 @@ class Program
         {
             case 'a':
                 if (secondLetter == 'b') isDisallowedPair = true;
-                break;
-                
+                break;             
             case 'c':
                 if (secondLetter == 'd') isDisallowedPair = true;;
                 break;
