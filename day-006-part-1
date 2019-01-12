@@ -52,25 +52,23 @@ class Program
         {
             case "turn on":
                 Console.WriteLine(
-                    "*** Turning on lights {0},{1} through {2},{3}...",
+                    "Turning on lights {0},{1} through {2},{3}...",
                     x0, y0, x1, y1);
                 actionFunction = TurnOnLight;
                 break;
             case "turn off":
                 Console.WriteLine(
-                    "*** Turning off lights {0},{1} through {2},{3}...",
+                    "Turning off lights {0},{1} through {2},{3}...",
                      x0, y0, x1, y1);
                 actionFunction = TurnOffLight;
                 break;
             case "toggle":
                 Console.WriteLine(
-                    "*** Toggling lights {0},{1} through {2},{3}...",
+                    "Toggling lights {0},{1} through {2},{3}...",
                      x0, y0, x1, y1);
                 actionFunction = ToggleLight;
                 break;
         }
-        
-        Console.WriteLine("got here");
         
         for (int y = y0; y <= y1; y++)
         {
@@ -79,8 +77,6 @@ class Program
                 actionFunction(lights, x, y);
             }
         }
-
-        Console.WriteLine("got here 2");
     }
     
     delegate void ActionFunction(bool[,] lights, int x, int y);
