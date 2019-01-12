@@ -1,0 +1,142 @@
+using System.IO;
+using System;
+using System.Text.RegularExpressions;
+
+/*
+
+https://adventofcode.com/2015/day/6#part2
+
+*/
+
+class Program
+{
+    const int LIGHTS = 1000;
+    
+    static void Main()
+    {
+        // in C# bools default to false
+        int[,] lights = new int[LIGHTS, LIGHTS];
+        
+        string instruction = Console.ReadLine();
+        while (!string.IsNullOrEmpty(instruction))
+        {
+            Console.WriteLine("Instruction given: {0}", instruction);
+
+            Regex regex = new Regex(@"^(\D+)(\d+),(\d+)(\D+)(\d+),(\d+)");
+            Match match = regex.Match(instruction);
+            
+            if (match.Success)
+            {
+                string action = match.Groups[1].Value.Trim();
+                int x0 = Int32.Parse(match.Groups[2].Value);
+                int y0 = Int32.Parse(match.Groups[3].Value);
+                int x1 = Int32.Parse(match.Groups[5].Value);
+                int y1 = Int32.Parse(match.Groups[6].Value);
+                
+                ActOnLights(lights, action, x0, y0, x1, y1);
+                
+                instruction = Console.ReadLine();
+            }     
+        }
+
+        ShowLights(lights); 
+
+        Console.WriteLine("Total brightness: {0}", TotalBrightness(lights));
+    }
+    
+    static void ActOnLights(int[,] lights, string action, int x0, int y0, int x1, int y1)
+    {
+        ActionFunction actionFunction = TurnOffLight;
+        
+        switch (action)
+        {
+            case "turn on":
+                Console.WriteLine(
+                    "Turning on lights {0},{1} through {2},{3}...",
+                    x0, y0, x1, y1);
+                actionFunction = TurnOnLight;
+                break;
+            case "turn off":
+                Console.WriteLine(
+                    "Turning off lights {0},{1} through {2},{3}...",
+                     x0, y0, x1, y1);
+                actionFunction = TurnOffLight;
+                break;
+            case "toggle":
+                Console.WriteLine(
+                    "Toggling lights {0},{1} through {2},{3}...",
+                     x0, y0, x1, y1);
+                actionFunction = ToggleLight;
+                break;
+        }
+        
+        for (int y = y0; y <= y1; y++)
+        {
+            for (int x = x0; x <= x1; x++)
+            {
+                actionFunction(lights, x, y);
+            }
+        }
+    }
+    
+    delegate void ActionFunction(int[,] lights, int x, int y);
+    
+    static void TurnOnLight(int[,] lights, int x, int y)
+    {
+        lights[x, y]++;
+    }
+    
+    static void TurnOffLight(int[,] lights, int x, int y)
+    {
+        if (lights[x, y] > 0)
+            lights[x, y]--;
+        else
+            lights[x, y] = 0;
+    }
+    
+    static void ToggleLight(int[,] lights, int x, int y)
+    {
+        lights[x, y] = lights[x, y] + 2;
+    }
+ 
+    static void ShowLights(int[,] lights)
+    {
+        for (int y = 0; y < LIGHTS; y++)
+        {
+            Console.Write("{0}\t", y);
+            for (int x = 0; x < LIGHTS; x++)
+            {
+                Console.Write(lights[x, y]);
+            }
+            
+            Console.WriteLine();
+        }
+    }
+
+    static int TotalBrightness(int[,] lights)
+    {
+        int totalBrightness = 0;
+        for (int y = 0; y < LIGHTS; y++)
+        {
+            for (int x = 0; x < LIGHTS; x++)
+            {
+                totalBrightness += lights[x, y];
+            }
+        }
+
+        return totalBrightness;
+    }
+}
+
+/*
+
+sample input:
+
+turn on 0,0 through 49,49
+toggle 5,5 through 25,25
+turn off 19,19 through 39,39
+toggle 15,30 through 30,35
+
+answer when run against input at adventofcode: 14687245
+
+*/
