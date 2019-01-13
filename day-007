@@ -1,0 +1,146 @@
+using System.IO;
+using System;
+using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Linq;
+
+/*
+
+https://adventofcode.com/2015/day/7 
+
+*/
+
+namespace Day7
+{
+    public class Program
+    {
+        private const bool DEBUGGING = true;
+        private const string VARIABLE_TO_FIND = "a";
+
+        private static Dictionary<string, int> Values;
+        private static List<Operation> Operations;
+
+        public static void Main()
+        { 
+            Operations = new List<Operation>();
+
+            string line = Console.ReadLine();
+            while (!string.IsNullOrEmpty(line))
+            {
+                string[] parts = line.Split(' ');
+
+                AddOperation(parts); 
+                
+                line = Console.ReadLine();
+            }
+
+            CompletePart1();
+
+            CompletePart2();
+        }
+
+        private static void AddOperation(string[] parts)
+        {
+            Operation operation = new Operation();
+            switch(parts.Length)
+            {
+                case 3: // ex. 123 -> a
+                    operation.Operator = "";
+                    operation.LeftOperand = parts[0];
+                    operation.Result = parts[2];
+                    break;
+                case 4: // ex. NOT x -> h
+                    operation.Operator = parts[0];
+                    operation.RightOperand = parts[1];
+                    operation.Result = parts[3];
+                    break;
+                case 5: // ex. x AND y -> d
+                    operation.Operator = parts[1];
+                    operation.LeftOperand = parts[0];
+                    operation.RightOperand = parts[2];
+                    operation.Result = parts[4];
+                break;
+            }
+            Operations.Add(operation);
+        }
+
+        private static void CompletePart1()
+        {
+            GetValues();
+
+            Console.WriteLine("Part 1 result: {0} = {1}", VARIABLE_TO_FIND, Values[VARIABLE_TO_FIND]);
+        }
+
+        private static void CompletePart2()
+        {
+            Operation operation = Operations.FirstOrDefault(o => o.Result == "b");
+            Operations.Remove(operation);
+            operation.LeftOperand = Values[VARIABLE_TO_FIND].ToString();
+            Operations.Add(operation);
+
+            GetValues();
+
+            Console.WriteLine("Part 2 result: {0} = {1}", VARIABLE_TO_FIND, Values["a"]);
+        }
+
+        private static void GetValues()
+        {
+            Values = new Dictionary<string, int>();
+            foreach(Operation operation in Operations)
+            {
+                GetValues(operation);
+            }
+        }
+
+        private class Operation
+        {
+            public string Operator { get; set; }
+            public string LeftOperand { get; set; }
+            public string RightOperand { get; set; }
+            public string Result { get; set; }
+        }
+
+        private static void GetValues(Operation operation)
+        {
+            switch(operation.Operator)
+            {
+                case "":
+                    Values[operation.Result] = GetValue(operation.LeftOperand);
+                    break;
+                case "NOT":
+                    Values[operation.Result] = ~GetValue(operation.RightOperand);
+                    break;
+                case "OR":
+                    Values[operation.Result] = GetValue(operation.LeftOperand) | GetValue(operation.RightOperand);
+                    break;
+                case "AND":
+                    Values[operation.Result] = GetValue(operation.LeftOperand) & GetValue(operation.RightOperand);
+                    break;
+                case "RSHIFT":
+                    Values[operation.Result] = GetValue(operation.LeftOperand) >> GetValue(operation.RightOperand);
+                    break;
+                case "LSHIFT":
+                    Values[operation.Result] = GetValue(operation.LeftOperand) << GetValue(operation.RightOperand);
+                    break;
+            }
+        }
+
+        private static int GetValue(string operand)
+        {
+            int value = 0;
+
+            if (Int32.TryParse(operand, out value)) return value;
+            
+            if (!Values.ContainsKey(operand))
+            {
+                Operation operation = Operations.FirstOrDefault(o => o.Result == operand);
+                GetValues(operation);
+            }
+            value = Values[operand];
+          
+            if (DEBUGGING) Console.WriteLine("{0} {1}", operand, value);
+
+            return value;
+        }
+    }
+}
