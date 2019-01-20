@@ -1,0 +1,47 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+
+/*
+
+https://adventofcode.com/2015/day/8
+
+*/
+
+class Program
+{
+    static void Main()
+    {
+        bool DEBUGGING = true;
+        
+        string input = Console.ReadLine();
+        
+        int totalCharactersOfCode = 0;
+        int totalCharactersInMemory = 0;
+        int totalEncodedCharacters = 0;
+        
+        while (input != null && input.Length >= 2)
+        {
+            if (DEBUGGING) Console.WriteLine("input: {0}", input);
+            
+            totalCharactersOfCode += input.Length;
+            if (DEBUGGING) Console.WriteLine("totalCharactersOfCode: {0}",  totalCharactersOfCode);
+            
+            totalCharactersInMemory += Regex.Match(input, @"^""(.|\\.|\\x..)*""").Groups[1].Captures.Count;
+            if (DEBUGGING) Console.WriteLine("totalCharactersInMemory: {0}",  totalCharactersInMemory);
+            
+            totalEncodedCharacters += 2 + input.Sum(c => (c == '\"' || c == '\\' ? 2 : 1));
+            if (DEBUGGING) Console.WriteLine("totalEncodedCharacters: {0}",  totalEncodedCharacters);
+           
+            input = Console.ReadLine();
+        }
+        
+        Console.WriteLine("totalCharactersOfCode: {0}",  totalCharactersOfCode);
+        Console.WriteLine("totalCharactersInMemory: {0}",  totalCharactersInMemory);
+        Console.WriteLine("totalEncodedCharacters: {0}",  totalEncodedCharacters);
+        
+        Console.WriteLine("part 1 difference: {0}",  totalCharactersOfCode - totalCharactersInMemory);
+        Console.WriteLine("part 2 difference: {0}",  totalEncodedCharacters - totalCharactersOfCode);
+    }
+}
