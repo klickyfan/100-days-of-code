@@ -1,0 +1,51 @@
+using System;
+using System.Text;
+
+/*
+
+https://adventofcode.com/2015/day/10
+
+also see https://www.youtube.com/watch?v=ea7lJkEhytA
+
+*/
+
+public class Program
+{
+    const int SEQUENCES_TO_FIND = 40;
+    const string TEST_DATA = @"1321131112";
+    
+    // answer for this test data is 11131221133112
+    
+    public static void Main()
+    {    
+        var oldSequence = TEST_DATA;
+        
+        Console.WriteLine("Sequence[0] is {0}", oldSequence);
+        
+        for (var i = 1; i <= SEQUENCES_TO_FIND; i++)
+        {
+            var indexOfLastChange = 0;
+
+            StringBuilder newSequence = new StringBuilder();
+
+            for (var j = 1; j <= oldSequence.Length; j++)
+            {        
+                if (j == oldSequence.Length || oldSequence[indexOfLastChange] != oldSequence[j])
+                {
+                    var unchangedSubsequenceLength = j -  indexOfLastChange;
+
+                    newSequence.Append(unchangedSubsequenceLength.ToString());                
+                    newSequence.Append(oldSequence[indexOfLastChange]);
+
+                    indexOfLastChange = j;
+                }    
+            }
+
+            Console.WriteLine("Sequence[{0}] is {1}.", i, newSequence.ToString());
+            
+            oldSequence = newSequence.ToString();
+        }
+        
+        Console.WriteLine("The length of the final sequence is {0}.", oldSequence.Length);
+    }
+}
