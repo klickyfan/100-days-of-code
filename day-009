@@ -1,0 +1,113 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+
+// Using https://github.com/eoincampbell/combinatorics/blob/deployment/src/Combinatorics/Permutations.cs.
+using Combinatorics.Collections;
+
+public class Program
+{
+    const string TEST_DATA = @"
+Tristram to AlphaCentauri = 34
+Tristram to Snowdin = 100
+Tristram to Tambi = 63
+Tristram to Faerun = 108
+Tristram to Norrath = 111
+Tristram to Straylight = 89
+Tristram to Arbre = 132
+AlphaCentauri to Snowdin = 4
+AlphaCentauri to Tambi = 79
+AlphaCentauri to Faerun = 44
+AlphaCentauri to Norrath = 147
+AlphaCentauri to Straylight = 133
+AlphaCentauri to Arbre = 74
+Snowdin to Tambi = 105
+Snowdin to Faerun = 95
+Snowdin to Norrath = 48
+Snowdin to Straylight = 88
+Snowdin to Arbre = 7
+Tambi to Faerun = 68
+Tambi to Norrath = 134
+Tambi to Straylight = 107
+Tambi to Arbre = 40
+Faerun to Norrath = 11
+Faerun to Straylight = 66
+Faerun to Arbre = 144
+Norrath to Straylight = 115
+Norrath to Arbre = 135
+Straylight to Arbre = 127";
+            
+    public static void Main()
+    {        
+        var cityDistances = GetCityDistances();
+        
+        var cities = cityDistances.Select(s => s.Key.Item1).Distinct().ToList();
+        
+        // Get lists containing all the cities, in all possible orders.
+        var routes = new Permutations<string>(cities, GenerateOption.WithoutRepetition);
+
+        IReadOnlyList<string> shortestRoute = null;
+        var shortestRouteDistance = Int32.MaxValue;
+        
+        IReadOnlyList<string> longestRoute = null;
+        var longestRouteDistance = 0;
+
+        foreach (var route in routes)
+        {
+            var routeDistance = 0;
+            
+            for (var i = 1; i < route.Count; i++)
+            {
+                var cityDistance = (cityDistances.First(d => d.Key.Item1 == route[i - 1] && d.Key.Item2 == route[i])).Value;
+                routeDistance += cityDistance;
+            }
+            
+            if (routeDistance < shortestRouteDistance)
+            {
+                shortestRoute = route;
+                shortestRouteDistance = routeDistance;
+            } 
+            else if (routeDistance > longestRouteDistance)
+            {
+                longestRoute = route;
+                longestRouteDistance = routeDistance;
+            }
+        }
+
+        Console.WriteLine("The shortest route is {0} ({1} miles).", shortestRoute.Aggregate((i, j) => i + " to " + j), shortestRouteDistance);
+        Console.WriteLine("The longestest route is {0} ({1} miles).", longestRoute.Aggregate((i, j) => i + " to " + j), longestRouteDistance);
+    }
+    
+    // Returns a dictionary of the distances between pairs of cities.
+    private static Dictionary<(string, string), int> GetCityDistances()
+    {
+        const string LINE_PATTERN = @"^(?<cityA>[a-z]+)[ ]+to[ ]+(?<cityB>[a-z]+)[ ]+=[ ]+(?<distance>[\d]+)";
+        
+        Regex regex = new Regex(LINE_PATTERN, RegexOptions.IgnoreCase);
+        
+        Dictionary<(string, string), int> cityDistances = new Dictionary<(string, string), int>();
+        
+        using (StringReader reader = new StringReader(TEST_DATA)) 
+        {
+            string line; 
+            while ((line = reader.ReadLine()) != null) 
+            {
+                Match match = regex.Match(line);
+
+                if (match.Success)
+                {
+                    var cityA = match.Groups["cityA"].Value;
+                    var cityB = match.Groups["cityB"].Value;
+                    var distance = Convert.ToInt32(match.Groups["distance"].Value);
+                    
+                    cityDistances.Add((cityA, cityB), distance);
+                    cityDistances.Add((cityB, cityA), distance);
+                }
+            }
+            
+            return cityDistances;
+        }
+    }
+}
