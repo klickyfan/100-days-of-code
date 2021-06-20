@@ -14,8 +14,6 @@ public class Program
     const int SEQUENCES_TO_FIND = 40;
     const string TEST_DATA = @"1321131112";
     
-    // answer for this test data is 11131221133112
-    
     public static void Main()
     {    
         var oldSequence = TEST_DATA;
