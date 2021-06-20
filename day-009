@@ -7,6 +7,12 @@ using System.Text.RegularExpressions;
 // Using https://github.com/eoincampbell/combinatorics/blob/deployment/src/Combinatorics/Permutations.cs.
 using Combinatorics.Collections;
 
+/*
+
+https://adventofcode.com/2015/day/9
+
+*/
+
 public class Program
 {
     const string TEST_DATA = @"
