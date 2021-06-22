@@ -51,7 +51,7 @@ Straylight to Arbre = 127";
         
         var cities = cityDistances.Select(s => s.Key.Item1).Distinct().ToList();
         
-        // Get lists containing all the cities, in all possible orders.
+        // get lists containing all the cities, in all possible orders
         var routes = new Permutations<string>(cities, GenerateOption.WithoutRepetition);
 
         IReadOnlyList<string> shortestRoute = null;
@@ -86,9 +86,12 @@ Straylight to Arbre = 127";
         Console.WriteLine("The longestest route is {0} ({1} miles).", longestRoute.Aggregate((i, j) => i + " to " + j), longestRouteDistance);
     }
     
-    // Returns a dictionary of the distances between pairs of cities.
+    /// <summary>
+    /// Returns a dictionary of the distances between pairs of cities.
+    /// </summary>
     private static Dictionary<(string, string), int> GetCityDistances()
     {
+        // https://regex101.com/r/Cr87v2/1/
         const string LINE_PATTERN = @"^(?<cityA>[a-z]+)[ ]+to[ ]+(?<cityB>[a-z]+)[ ]+=[ ]+(?<distance>[\d]+)";
         
         Regex regex = new Regex(LINE_PATTERN, RegexOptions.IgnoreCase);
