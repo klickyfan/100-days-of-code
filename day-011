@@ -40,11 +40,9 @@ public class Program
             password[index] = 'a';
             return  GetNextPassword(password, index - 1);
         }
-        else
-        {
-            password[index] = (char)(letterToChange + 1);
-            return password;
-        }
+
+        password[index] = (char)(letterToChange + 1);
+        return password;
     }
                           
     private static bool Valid(string password)
