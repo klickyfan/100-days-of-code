@@ -1,0 +1,80 @@
+using System;
+using System.Text.RegularExpressions;
+
+/*
+
+https://adventofcode.com/2015/day/11
+
+*/
+
+public class Program
+{
+    const string OLD_PASSWORD = @"vzbxkghb";
+    //const string OLD_PASSWORD = @"vzbxxyzz";
+    
+    static int counter = 1;
+    
+    public static void Main()
+    {    
+        var passwordToValidate = OLD_PASSWORD;
+        
+        do
+        {
+            passwordToValidate = new string(GetNextPassword(passwordToValidate.ToCharArray(), passwordToValidate.Length -1));        
+        } while (!Valid(passwordToValidate));
+        
+        Console.WriteLine("New password: {0}", string.Concat(passwordToValidate));
+    }
+
+    private static char[] GetNextPassword(char[] password, int index)
+    {
+        if (index < 0)
+        {
+            return password;
+        }
+
+        var letterToChange = password[index];
+        
+        if (letterToChange == 'z')
+        {
+            password[index] = 'a';
+            return  GetNextPassword(password, index - 1);
+        }
+        else
+        {
+            password[index] = (char)(letterToChange + 1);
+            return password;
+        }
+    }
+                          
+    private static bool Valid(string password)
+    {
+        var foundStraight = false;
+        
+        for (var i = 0; i < password.Length - 2; i++)
+        {
+            if ((password[i] == password[i + 1] - 1) && (password[i + 1] == password[i + 2] - 1))
+            {
+                foundStraight = true;
+            }
+        }
+        
+        if (!foundStraight)
+        {
+            return false;
+        }
+
+        if (password.Contains('i') || password.Contains('l') || password.Contains('o'))
+        {
+            return false;
+        }
+
+        // https://regex101.com/r/hFCh97/1
+        if (!Regex.IsMatch(password, @".*(.)\1.*(.)\2.*")) 
+        {
+            return false;
+        }
+
+        return true;
+    }
+}
