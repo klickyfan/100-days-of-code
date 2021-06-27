@@ -1,8 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
+
+// https://adventofcode.com/2015/day/12
 
 public class Program
 {
