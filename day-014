@@ -1,0 +1,257 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
+
+/*
+https://adventofcode.com/2015/day/14
+*/
+
+namespace AdventOfCode
+{
+    public static class Program
+    {
+        /*
+        const string TEST_DATA = @"
+Comet can fly 14 km/s for 10 seconds, but then must rest for 127 seconds.
+Dancer can fly 16 km/s for 11 seconds, but then must rest for 162 seconds.";
+        */
+
+        const string TEST_DATA = @"
+Dancer can fly 27 km/s for 5 seconds, but then must rest for 132 seconds.
+Cupid can fly 22 km/s for 2 seconds, but then must rest for 41 seconds.
+Rudolph can fly 11 km/s for 5 seconds, but then must rest for 48 seconds.
+Donner can fly 28 km/s for 5 seconds, but then must rest for 134 seconds.
+Dasher can fly 4 km/s for 16 seconds, but then must rest for 55 seconds.
+Blitzen can fly 14 km/s for 3 seconds, but then must rest for 38 seconds.
+Prancer can fly 3 km/s for 21 seconds, but then must rest for 40 seconds.
+Comet can fly 18 km/s for 6 seconds, but then must rest for 103 seconds.
+Vixen can fly 18 km/s for 5 seconds, but then must rest for 84 seconds.";
+
+        const int SECONDS_TO_RACE = 2503;
+
+        public static void Main()
+        {
+            var allReindeer = GetAllReindeer();
+
+            foreach (var reindeer in allReindeer)
+            {
+                reindeer.Value.PrepareToRace();
+            }
+
+            Part1(allReindeer);
+
+            foreach (var reindeer in allReindeer)
+            {
+                reindeer.Value.PrepareToRace();
+            }
+
+            Part2(allReindeer);
+        }
+
+        private static void Part1(Dictionary<string, Reindeer> allReindeer)
+        {
+            RaceForDistance(allReindeer);
+
+            string winningReindeerName = string.Empty;
+            int winningDistanceReached = 0;
+
+            Console.WriteLine();
+
+            foreach (var reindeer in allReindeer)
+            {
+                Console.WriteLine($"{reindeer.Key} reached {reindeer.Value.DistanceReached} kilometers in {SECONDS_TO_RACE} seconds.");
+                if (reindeer.Value.DistanceReached > winningDistanceReached)
+                {
+                    winningReindeerName = reindeer.Key;
+                    winningDistanceReached = reindeer.Value.DistanceReached;
+                }
+            }
+
+            Console.WriteLine($"\n{winningReindeerName} won the race!");
+        }
+
+        /// <summary>
+        /// Calculates the distance each reindeer can run in <c>SECONDS_TO_RACE</c>.
+        /// </summary>
+        private static void RaceForDistance(Dictionary<string, Reindeer> allReindeer)
+        {
+            foreach (var reindeer in allReindeer)
+            {
+                int distanceReached = 0;
+                int secondsElapsed = 0;
+
+                do
+                {
+                    if (secondsElapsed + reindeer.Value.MaximumFlyingTime < SECONDS_TO_RACE)
+                    {
+                        // fly
+                        distanceReached += (reindeer.Value.MaximumFlyingTime * reindeer.Value.FlightSpeed);
+                        secondsElapsed += reindeer.Value.MaximumFlyingTime;
+
+                        // rest
+                        if (secondsElapsed + reindeer.Value.MinimumRestingTime < SECONDS_TO_RACE)
+                        {
+                            secondsElapsed += reindeer.Value.MinimumRestingTime;
+                        }
+                        else
+                        {
+                            secondsElapsed += SECONDS_TO_RACE - secondsElapsed;
+
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        distanceReached += (reindeer.Value.MaximumFlyingTime * (SECONDS_TO_RACE - secondsElapsed));
+                        secondsElapsed += SECONDS_TO_RACE - secondsElapsed;
+
+                        break;
+                    }
+                } while (true);
+
+                reindeer.Value.DistanceReached = distanceReached;
+            }
+        }
+
+        private static void Part2(Dictionary<string, Reindeer> allReindeer)
+        {
+            RaceForPoints(allReindeer);
+
+            string winningReindeerName = string.Empty;
+            int winningReindeerPoints = 0;
+
+            Console.WriteLine();
+
+            foreach (var reindeer in allReindeer)
+            {
+                Console.WriteLine($"{reindeer.Key} accumulated {reindeer.Value.PointsAccumulated} points in {SECONDS_TO_RACE} seconds.");
+                if (reindeer.Value.PointsAccumulated > winningReindeerPoints)
+                {
+                    winningReindeerName = reindeer.Key;
+                    winningReindeerPoints = reindeer.Value.PointsAccumulated;
+                }
+            }
+
+            Console.WriteLine($"\n{winningReindeerName} won the race!");
+        }
+
+        /// <summary>
+        /// Calculates the number points each reindeer accumulates in <c>SECONDS_TO_RACE</c>.
+        /// </summary>
+        private static void RaceForPoints(Dictionary<string, Reindeer> allReindeer)
+        {
+            for (var secondsElapsed = 0; secondsElapsed < SECONDS_TO_RACE; secondsElapsed++)
+            {
+                HashSet<string> winningReindeerNames = new();
+                int winningDistanceReached = 0;
+
+                foreach (var reindeer in allReindeer)
+                {
+                    if (reindeer.Value.Flying)
+                    {
+                        reindeer.Value.FlyingTime++;
+                        reindeer.Value.DistanceReached += reindeer.Value.FlightSpeed;
+                        if (reindeer.Value.FlyingTime == reindeer.Value.MaximumFlyingTime)
+                        {
+                            reindeer.Value.Flying = false;
+                            reindeer.Value.FlyingTime = 0;
+                        }
+                    }
+                    else
+                    {
+                        reindeer.Value.RestingTime++;
+                        if (reindeer.Value.RestingTime == reindeer.Value.MinimumRestingTime)
+                        {
+                            reindeer.Value.Flying = true;
+                            reindeer.Value.RestingTime = 0;
+                        }
+                    }
+
+                    if (reindeer.Value.DistanceReached > winningDistanceReached)
+                    {
+                        winningReindeerNames.Clear();
+                        winningReindeerNames.Add(reindeer.Key);
+                        winningDistanceReached = reindeer.Value.DistanceReached;
+                    }
+                    else if (reindeer.Value.DistanceReached == winningDistanceReached)
+                    {
+                        winningReindeerNames.Add(reindeer.Key);
+                    }
+                }
+
+                foreach (var name in winningReindeerNames)
+                {
+                    allReindeer[name].PointsAccumulated++;
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Returns a dictionary of reindeer (and their abilities).
+        /// </summary>
+        private static Dictionary<string, Reindeer> GetAllReindeer()
+        {
+            // https://regex101.com/r/atVv0D/1
+            const string LINE_PATTERN = @"^(?<reindeer>[a-zA-Z]+) can fly (?<flightSpeed>[\d]+) km\/s for (?<maximumFlyingTime>[\d]+) seconds, but then must rest for (?<minimumRestingTime>[\d]+) seconds.";
+
+            Regex regex = new Regex(LINE_PATTERN, RegexOptions.IgnoreCase);
+
+            Dictionary<string, Reindeer> allReindeer = new();
+
+            using (StringReader reader = new StringReader(TEST_DATA))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    Match match = regex.Match(line);
+
+                    if (match.Success)
+                    {
+                        var reindeerName = match.Groups["reindeer"].Value;
+
+                        allReindeer.Add(
+                            reindeerName,
+                            new Reindeer
+                            {
+                                FlightSpeed = Convert.ToInt32(match.Groups["flightSpeed"].Value),
+                                MaximumFlyingTime = Convert.ToInt32(match.Groups["maximumFlyingTime"].Value),
+                                MinimumRestingTime = Convert.ToInt32(match.Groups["minimumRestingTime"].Value)
+                            });
+                    }
+                }
+
+                return allReindeer;
+            }
+        }
+    }
+
+    public class Reindeer
+    {
+        public int FlightSpeed { get; set; }
+
+        public int MaximumFlyingTime { get; set; }
+
+        public int MinimumRestingTime { get; set; }
+
+        public bool Flying { get; set; } = true;
+
+        public int FlyingTime { get; set; }
+
+        public int RestingTime { get; set; }
+
+        public int DistanceReached { get; set; }
+
+        public int PointsAccumulated { get; set; }
+
+        public void PrepareToRace()
+        {
+            Flying = true;
+            FlyingTime = 0;
+            RestingTime = 0;
+            DistanceReached = 0;
+            PointsAccumulated = 0;
+        }
+    }
+}
