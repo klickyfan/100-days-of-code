@@ -1,0 +1,59 @@
+using System;
+
+/*
+
+https://adventofcode.com/2015/day/15
+
+I am sure there is a more generic way to solve this problem, but heck if I can figure it out right now. Maybe another day...
+
+*/
+
+namespace AdventOfCode
+{
+    public static class Program
+    {
+        static void Main(string[] args)
+        {
+            int[] sprinkles = new[] { 5, -1, 0, 0, 5 };
+            int[] peanutButter = new[] { -1, 3, 0, 0, 1 };
+            int[] frosting= new[] { 0, -1, 4, 0, 6 };
+            int[] sugar = new[] { -1, 0, 0, 2, 8 };
+
+            int highestCookieScore = 0;
+            int highest500CalorieCookieScore = 0;
+
+            for (int i = 100; i >= 0; i--)
+            {
+                for (int j = 100 - i; j >= 0; j--)
+                {
+                    for (int k = 100 - i - j; k >= 0; k--)
+                    {
+                        int l = 100 - i - j - k;
+
+                        int capacity = sprinkles[0] * i + peanutButter[0] * j + frosting[0] * k + sugar[0] * l;
+                        int durability = sprinkles[1] * i + peanutButter[1] * j + frosting[1] * k + sugar[1] * l;
+                        int flavor = sprinkles[2] * i + peanutButter[2] * j + frosting[2] * k + sugar[2] * l;
+                        int texture = sprinkles[3] * i + peanutButter[3] * j + frosting[3] * k + sugar[3] * l;
+
+                        int score = Math.Max(0, capacity) * Math.Max(0, durability) * Math.Max(0, flavor) * Math.Max(0, texture);
+
+                        if (score > highestCookieScore)
+                        {
+                            highestCookieScore = score;
+                        }
+
+                        int calories = sprinkles[4] * i + peanutButter[4] * j + frosting[4] * k + sugar[4] * l;
+
+                        if (calories == 500 && score > highest500CalorieCookieScore)
+                        {
+                            highest500CalorieCookieScore = score;
+                        }
+                    }
+                }
+            }
+
+            Console.WriteLine($"Highest cookie score: {highestCookieScore}");
+            Console.WriteLine($"Highest 500 calorie cookie score: {highest500CalorieCookieScore }");
+        }
+    }
+}
