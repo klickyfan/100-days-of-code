@@ -88,7 +88,6 @@ namespace AdventOfCode
                     if (match.Success)
                     {
                         var sueNumber = Convert.ToInt32(match.Groups["sue"].Value);
-
                         
                         if (part2MFCSAM[match.Groups[1].Value](Convert.ToInt32(match.Groups[2].Value)) &&
                             part2MFCSAM[match.Groups[3].Value](Convert.ToInt32(match.Groups[4].Value)) &&
