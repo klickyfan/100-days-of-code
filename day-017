@@ -1,0 +1,77 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+/*
+https://adventofcode.com/2015/day/17
+*/
+
+namespace AdventOfCode
+{
+    public static class Program
+    {
+        //private const int TARGET_LITERS = 25;
+        //private static readonly List<int> ContainerSizes = new List<int>() { 20, 15, 10, 5, 5 };
+
+        private const int TARGET_LITERS = 150;
+        private static readonly List<int> ContainerSizes = new List<int>() { 11, 30, 47, 31, 32, 36, 3, 1, 5, 3, 32, 36, 15, 11, 46, 26, 28, 1, 19, 3 };
+
+        public static List<List<int>> ContainerCombinations { get; set; } = new();
+
+        static void Main()
+        {
+            Console.WriteLine($"Target liters: {TARGET_LITERS}");
+
+            FindContainerCombinations(new List<int>(), ContainerSizes);
+
+            Console.WriteLine($"{ContainerCombinations.Count} possible combinations:");
+
+            int smallestCombinationCount = int.MaxValue;
+
+            foreach(var combination in ContainerCombinations)
+            {
+                Console.WriteLine("(" + string.Join(", ", combination) + ")");
+
+                if (combination.Count < smallestCombinationCount)
+                {
+                    smallestCombinationCount = combination.Count;
+                }
+            }
+
+            Console.WriteLine($"\n{smallestCombinationCount} smallest combinations: ");
+
+            foreach (var combination in ContainerCombinations.Where(c => c.Count == smallestCombinationCount).Select(c => c).Distinct())
+            {
+                Console.WriteLine("(" + string.Join(", ", combination) + ")");
+            }
+
+             Console.ReadLine();
+        }
+
+        private static void FindContainerCombinations(List<int> partialContainerCombination, List<int> containerSizesRemaining)
+        {
+            var liters = partialContainerCombination.Sum();
+
+            if (liters > TARGET_LITERS)
+            {
+                return;
+            }
+
+            if (liters == TARGET_LITERS)
+            {
+                ContainerCombinations.Add(partialContainerCombination);
+                return;
+            }
+
+            for (int i = 0; i < containerSizesRemaining.Count; i++)
+            {
+                List<int> newPartialContainerCombination = new List<int>(partialContainerCombination);
+                newPartialContainerCombination.Add(containerSizesRemaining[i]);
+
+                FindContainerCombinations(
+                    newPartialContainerCombination,
+                    containerSizesRemaining.GetRange(i + 1, containerSizesRemaining.Count - (i + 1)));
+            }
+        }
+    }
+}
